@@ -12,16 +12,6 @@ public class GameManagerScript : MonoBehaviour
 
     // Start is called before the first frame update
 
-    /*void PrintArray()
-    {
-        string debugText = "";
-        for (int i = 0; i < map.Length; i++)
-        {
-            debugText += map[i].ToString() + ",";
-        }
-        Debug.Log(debugText);
-    }*/
-
     Vector2Int GetPlayerIndex()
     {
         for (int y = 0; y < map.GetLength(0); y++)
@@ -56,7 +46,6 @@ public class GameManagerScript : MonoBehaviour
             bool success = MoveNumber(moveTo, moveTo + velocity);
             if (!success) { return false; }
         }
-       
 
         field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
         field[moveFrom.y, moveFrom.x].transform.position =
@@ -65,17 +54,46 @@ public class GameManagerScript : MonoBehaviour
         return true;
     }
 
+    bool IsCleard()
+    {
+        //Vector2Int型の可変長列の作成
+        List<Vector2Int> goals = new List<Vector2Int>();
+        for (int y = 0; y < map.GetLength(0); y++)
+        {
+            for (int x = 0; x < map.GetLength(1); x++)
+            {
+                //格納場所かどうかを判断
+                if (map[y, x] == 3)
+                {
+                    //格納場所のインデックスを控える
+                    goals.Add(new Vector2Int(x, y));
+                }
+            }
+        }
+
+        for (int i = 0; i < goals.Count; i++)
+        {
+            GameObject f = field[goals[i].y, goals[i].x];
+            if (f == null || f.tag != "Box")
+            {
+                //一つでも箱が無かったら条件未達成
+                return false;
+            }
+        }
+        //条件未達成で無ければ条件達成
+        return true;
+    }
+
     void Start()
     {
-        /*//追加
-        GameObject instance = Instantiate(playerPrefab,
-            new Vector3(0, 0, 0), Quaternion.identity);*/
         //mapの生成
         map = new int[,]
         {
-            {1,0,2,0,0},
+            {0,0,0,0,0},
+            {0,3,1,3,0},
             {0,0,2,0,0},
-            {0,0,2,0,0}
+            {0,2,0,2,0},
+            {0,0,0,0,0}
         };
 
         //フィールドサイズの決定
@@ -119,8 +137,6 @@ public class GameManagerScript : MonoBehaviour
             debugText += "\n";//改行
         }
         Debug.Log(debugText);
-        /*map = new int[] { 0, 0, 2, 0, 1, 0 };
-        PrintArray();*/
     }
 
     // Update is called once per frame
@@ -132,7 +148,11 @@ public class GameManagerScript : MonoBehaviour
             //移動処理
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber(playerIndex, playerIndex + new Vector2Int(1, 0));
-            //PrintArray();
+            //もしクリアしたら
+            if (IsCleard())
+            {
+                Debug.Log("Clear");
+            }
         }
 
         //左移動
@@ -141,7 +161,11 @@ public class GameManagerScript : MonoBehaviour
             //移動処理
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber(playerIndex, playerIndex + new Vector2Int(-1, 0));
-            //PrintArray();
+            //もしクリアしたら
+            if (IsCleard())
+            {
+                Debug.Log("Clear");
+            }
         }
 
         //上移動
@@ -150,7 +174,11 @@ public class GameManagerScript : MonoBehaviour
             //移動処理
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber(playerIndex, playerIndex + new Vector2Int(0, -1));
-            //PrintArray();
+            //もしクリアしたら
+            if (IsCleard())
+            {
+                Debug.Log("Clear");
+            }
         }
 
         //下移動
@@ -158,8 +186,13 @@ public class GameManagerScript : MonoBehaviour
         {
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber(playerIndex, playerIndex + new Vector2Int(0, 1));
-            //PrintArray();
+            //もしクリアしたら
+            if (IsCleard())
+            {
+                Debug.Log("Clear");
+            }
         }
+
     }
 
 }
