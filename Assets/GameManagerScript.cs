@@ -7,6 +7,9 @@ public class GameManagerScript : MonoBehaviour
     //追加
     public GameObject playerPrefab;
     public GameObject boxPrefab;
+    public GameObject goalPrefab;
+
+    public GameObject clearText;
     int[,] map;　//レベルデザイン用の配列
     GameObject[,] field;//ゲーム管理用の配列
 
@@ -151,7 +154,7 @@ public class GameManagerScript : MonoBehaviour
             //もしクリアしたら
             if (IsCleard())
             {
-                Debug.Log("Clear");
+              clearText.SetActive(true);
             }
         }
 
@@ -164,7 +167,7 @@ public class GameManagerScript : MonoBehaviour
             //もしクリアしたら
             if (IsCleard())
             {
-                Debug.Log("Clear");
+                clearText.SetActive(true);
             }
         }
 
@@ -177,7 +180,7 @@ public class GameManagerScript : MonoBehaviour
             //もしクリアしたら
             if (IsCleard())
             {
-                Debug.Log("Clear");
+                clearText.SetActive(true);
             }
         }
 
@@ -189,7 +192,7 @@ public class GameManagerScript : MonoBehaviour
             //もしクリアしたら
             if (IsCleard())
             {
-                Debug.Log("Clear");
+                clearText.SetActive(true);
             }
         }
 
