@@ -7,11 +7,13 @@ public class GameManagerScript : MonoBehaviour
     //追加
     public GameObject playerPrefab;
     public GameObject boxPrefab;
-    public GameObject goalPrefab;
+    public GameObject goalPrefab; //チャレンジ課題ゴール
 
     public GameObject clearText;
     int[,] map;　//レベルデザイン用の配列
     GameObject[,] field;//ゲーム管理用の配列
+
+
 
     // Start is called before the first frame update
 
@@ -36,6 +38,7 @@ public class GameManagerScript : MonoBehaviour
     //再帰処理(箱を押す)　p43
     bool MoveNumber(Vector2Int moveFrom, Vector2Int moveTo)
     {
+
         //移動先が範囲外なら移動不可
         if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; }
         //移動先に2(箱)が居たら
@@ -50,9 +53,17 @@ public class GameManagerScript : MonoBehaviour
             if (!success) { return false; }
         }
 
+        //パーティクルの生成処理
+
+
+
+
         field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
-        field[moveFrom.y, moveFrom.x].transform.position =
-            new Vector3(moveTo.x, map.GetLength(0) - moveTo.y, 0);
+        //field[moveFrom.y, moveFrom.x].transform.position =
+        //new Vector3(moveTo.x, map.GetLength(0) - moveTo.y, 0);
+
+        Vector3 moveToPosition = new Vector3(moveTo.x, map.GetLength(0) - moveTo.y, 0);
+        field[moveFrom.y, moveFrom.x].GetComponent<Move>().MoveTo(moveToPosition);
         field[moveFrom.y, moveFrom.x] = null;
         return true;
     }
@@ -95,7 +106,7 @@ public class GameManagerScript : MonoBehaviour
             {0,0,0,0,0},
             {0,3,1,3,0},
             {0,0,2,0,0},
-            {0,2,0,2,0},
+            {0,2,3,2,0},
             {0,0,0,0,0}
         };
 
@@ -125,7 +136,15 @@ public class GameManagerScript : MonoBehaviour
                         Quaternion.identity
                         );
                 }
-
+                if (map[y, x] == 3)
+                {
+                    //GameObject instance
+                    field[y, x] = Instantiate(
+                        goalPrefab,
+                        new Vector3(x, map.GetLength(0) - y, 0.01f),
+                        Quaternion.identity
+                        );
+                }
             }
         }
 
@@ -154,7 +173,7 @@ public class GameManagerScript : MonoBehaviour
             //もしクリアしたら
             if (IsCleard())
             {
-              clearText.SetActive(true);
+                clearText.SetActive(true);
             }
         }
 
