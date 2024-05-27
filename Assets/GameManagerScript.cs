@@ -8,6 +8,8 @@ public class GameManagerScript : MonoBehaviour
     public GameObject playerPrefab;
     public GameObject boxPrefab;
     public GameObject goalPrefab; //チャレンジ課題ゴール
+    public GameObject particlePrefab; // パーティクルプレハブ
+
 
     public GameObject clearText;
     int[,] map;　//レベルデザイン用の配列
@@ -38,35 +40,45 @@ public class GameManagerScript : MonoBehaviour
     //再帰処理(箱を押す)　p43
     bool MoveNumber(Vector2Int moveFrom, Vector2Int moveTo)
     {
-
         //移動先が範囲外なら移動不可
         if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; }
-        //移動先に2(箱)が居たら
         if (moveTo.x < 0 || moveTo.x >= field.GetLength(1)) { return false; }
 
+        // 移動先に箱がある場合
         if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
         {
-            //どの方向へ移動するかを算出
+            // どの方向へ移動するかを算出
             Vector2Int velocity = moveTo - moveFrom;
-            //プレイヤーの移動先から、さらに先へ2(箱)を移動させる
+            // プレイヤーの移動先からさらに先へ箱を移動させる
             bool success = MoveNumber(moveTo, moveTo + velocity);
             if (!success) { return false; }
         }
 
-        //パーティクルの生成処理
+        // プレイヤーの移動時にパーティクルを生成
+        if (field[moveFrom.y, moveFrom.x] .tag == "Player")
+        {
+            for (int particle = 0; particle < 5; particle++)
+            {
+                Instantiate(
+                    particlePrefab,
+                    new Vector3(moveFrom.x, map.GetLength(0) - moveFrom.y, 0.0f),
+                    Quaternion.identity
+                );
+            }
+        }
 
-
-
-
+        // プレイヤーを新しい位置に移動
         field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
-        //field[moveFrom.y, moveFrom.x].transform.position =
-        //new Vector3(moveTo.x, map.GetLength(0) - moveTo.y, 0);
-
         Vector3 moveToPosition = new Vector3(moveTo.x, map.GetLength(0) - moveTo.y, 0);
-        field[moveFrom.y, moveFrom.x].GetComponent<Move>().MoveTo(moveToPosition);
+        field[moveTo.y, moveTo.x].GetComponent<Move>().MoveTo(moveToPosition);
+
+        // 元の位置を空にする
         field[moveFrom.y, moveFrom.x] = null;
+
         return true;
     }
+
+
 
     bool IsCleard()
     {
