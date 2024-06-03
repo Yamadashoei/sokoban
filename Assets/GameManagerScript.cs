@@ -9,13 +9,12 @@ public class GameManagerScript : MonoBehaviour
     public GameObject boxPrefab;
     public GameObject goalPrefab; //チャレンジ課題ゴール
     public GameObject particlePrefab; // パーティクルプレハブ
-
+    public GameObject wallPrefab; // 壁プレハブ
 
     public GameObject clearText;
     int[,] map;　//レベルデザイン用の配列
     GameObject[,] field;//ゲーム管理用の配列
-
-
+    int[,] firstMap; // 初期状態のマップを保存するための配列
 
     // Start is called before the first frame update
 
@@ -44,6 +43,12 @@ public class GameManagerScript : MonoBehaviour
         if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; }
         if (moveTo.x < 0 || moveTo.x >= field.GetLength(1)) { return false; }
 
+        // 移動先に壁がある場合
+        if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Wall")
+        {
+            return false;
+        }
+
         // 移動先に箱がある場合
         if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
         {
@@ -55,7 +60,7 @@ public class GameManagerScript : MonoBehaviour
         }
 
         // プレイヤーの移動時にパーティクルを生成
-        if (field[moveFrom.y, moveFrom.x] .tag == "Player")
+        if (field[moveFrom.y, moveFrom.x].tag == "Player")
         {
             for (int particle = 0; particle < 5; particle++)
             {
@@ -77,8 +82,6 @@ public class GameManagerScript : MonoBehaviour
 
         return true;
     }
-
-
 
     bool IsCleard()
     {
@@ -115,12 +118,25 @@ public class GameManagerScript : MonoBehaviour
         //mapの生成
         map = new int[,]
         {
-            {0,0,0,0,0},
-            {0,3,1,3,0},
-            {0,0,2,0,0},
-            {0,2,3,2,0},
-            {0,0,0,0,0}
+            {4,4,4,4,4,4,4,4,4,4,4,4},
+            {4,1,0,0,0,0,0,0,0,0,3,4},
+            {4,0,0,0,2,0,0,0,0,0,0,4},
+            {4,0,0,2,0,2,0,0,0,0,0,4},
+            {4,0,0,0,0,0,0,0,0,0,0,4},
+            {4,3,0,0,0,0,0,0,0,0,3,4},
+            {4,4,4,4,4,4,4,4,4,4,4,4}
         };
+
+        // 初期状態のマップを保存
+        firstMap = (int[,])map.Clone();
+
+        InitializeField();
+    }
+
+    void InitializeField()
+    {
+        Vector3 cameraPos = new Vector3(map.GetLength(1) / 2, map.GetLength(0) / 2 + 1, -10);
+        Camera.main.transform.position = cameraPos;
 
         //フィールドサイズの決定
         field = new GameObject[map.GetLength(0), map.GetLength(1)];
@@ -157,6 +173,15 @@ public class GameManagerScript : MonoBehaviour
                         Quaternion.identity
                         );
                 }
+                if (map[y, x] == 4)
+                {
+                    //GameObject instance
+                    field[y, x] = Instantiate(
+                        wallPrefab,
+                        new Vector3(x, map.GetLength(0) - y, 0.0f),
+                        Quaternion.identity
+                        );
+                }
             }
         }
 
@@ -171,6 +196,30 @@ public class GameManagerScript : MonoBehaviour
             debugText += "\n";//改行
         }
         Debug.Log(debugText);
+    }
+
+    void ReStartGame()
+    {
+        // 既存のフィールドをクリア x1,y0
+        for (int y = 0; y < field.GetLength(0); y++)
+        {
+            for (int x = 0; x < field.GetLength(1); x++)
+            {
+                if (field[y, x] != null)
+                {
+                    Destroy(field[y, x]);
+                }
+            }
+        }
+
+        // mapを初期状態に戻す
+        map = (int[,])firstMap.Clone();
+
+        // フィールドを初期化
+        InitializeField();
+
+        // クリアテキストを非表示にする
+        clearText.SetActive(false);
     }
 
     // Update is called once per frame
@@ -227,6 +276,10 @@ public class GameManagerScript : MonoBehaviour
             }
         }
 
+        //リセット
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            ReStartGame();
+        }
     }
-
 }
